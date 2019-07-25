@@ -7,5 +7,6 @@ setup(name='sbh_explorer',
       license='MIT',
       packages=['sbh_explorer'],
       install_requires=[
+          'pandas',
           'synbiohub_adapter@git+https://github.com/SD2E/synbiohub_adapter'
       ])

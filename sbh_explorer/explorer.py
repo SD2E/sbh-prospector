@@ -59,7 +59,7 @@ SBOL_FUNCTIONAL_COMPONENT = SBOL_ROOT + '#functionalComponent'
 SBOL_MODULE = SBOL_ROOT + '#module'
 SBOL_BUILT = SBOL_ROOT + '#built'
 SBOL_ROLE = SBOL_ROOT + '#role'
-SBOL_TYPE = sbhe.SBOL_ROOT + '#type'
+SBOL_TYPE = SBOL_ROOT + '#type'
 
 # CHEBI prefixes are used to identify reagents
 CHEBI_PURL_PREFIX = 'http://purl.obolibrary.org/obo/CHEBI'
@@ -362,7 +362,7 @@ def module_is_strain(sbh_query, module_uri):
 # cache size 256 is an arbitrary choice
 @functools.lru_cache(maxsize=256)
 def is_reagent(sbh_query, uri):
-    types = sbhe.objects_for(sbh_query, uri, SBOL_TYPE)
+    types = objects_for(sbh_query, uri, SBOL_TYPE)
     for typ in types:
         if typ.startswith(CHEBI_PURL_PREFIX) or typ.startswith(CHEBI_IDENTIFIERS_PREFIX):
             return True
@@ -377,8 +377,8 @@ def find_contained_items(sbh_query, uri, predicate):
         item = uris.pop(0)
         if predicate(sbh_query, item):
             found.append(item)
-        uris.extend(sbhe.child_module_definitions(sbh_query, item))
-        uris.extend(sbhe.child_component_definitions(sbh_query, item))
+        uris.extend(child_module_definitions(sbh_query, item))
+        uris.extend(child_component_definitions(sbh_query, item))
     return found
 
 

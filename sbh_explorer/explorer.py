@@ -408,15 +408,15 @@ def find_contained_strains(sbh_query, uri):
     modules = [uri]
     while modules:
         module = modules.pop(0)
-        print('Module: {}'.format(module))
+        # print('Module: {}'.format(module))
         if module_is_strain(sbh_query, module):
             strains.append(module)
         # print('Modules: {}'.format(modules))
         children = child_module_definitions(sbh_query, module)
         # print('children: {}'.format(children))
-        print('Module {} has {} children'.format(module, len(children)))
+        # print('Module {} has {} children'.format(module, len(children)))
         modules.extend(children)
-    print('Strains: {}'.format(strains))
+    # print('Strains: {}'.format(strains))
     return strains
 
 

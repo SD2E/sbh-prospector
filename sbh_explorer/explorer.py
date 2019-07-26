@@ -1,4 +1,5 @@
 import argparse
+import functools
 import logging
 import os
 import sys
@@ -58,6 +59,11 @@ SBOL_FUNCTIONAL_COMPONENT = SBOL_ROOT + '#functionalComponent'
 SBOL_MODULE = SBOL_ROOT + '#module'
 SBOL_BUILT = SBOL_ROOT + '#built'
 SBOL_ROLE = SBOL_ROOT + '#role'
+SBOL_TYPE = sbhe.SBOL_ROOT + '#type'
+
+# CHEBI prefixes are used to identify reagents
+CHEBI_PURL_PREFIX = 'http://purl.obolibrary.org/obo/CHEBI'
+CHEBI_IDENTIFIERS_PREFIX = 'http://identifiers.org/chebi/CHEBI'
 
 CHALLENGE_PROBLEMS = [
     sbha.SD2Constants.RULE_30_DESIGN_COLLECTION,
@@ -270,6 +276,8 @@ def format_query_result(sbh_query, result, bindings=None):
     return formatted_result
 
 
+# cache size 256 is an arbitrary choice
+@functools.lru_cache(maxsize=256)
 def parent_module_definitions(sbh_query, uri):
     """Find all the module definitions that contain this element. This
     function does not recursively find grandparents, etc. It only goes
@@ -286,16 +294,40 @@ def parent_module_definitions(sbh_query, uri):
     return result
 
 
+# cache size 256 is an arbitrary choice
+@functools.lru_cache(maxsize=256)
+def root_module_definitions(sbh_query, uri):
+    """Perform a breadth first search up the module definition hierarchy
+    looking for module definitions which have no parent module.
+    """
+    ancestors = list(parent_module_definitions(sbh_query, uri))
+    roots = []
+    # print(ancestors)
+    while ancestors:
+        parent = ancestors.pop(0)
+        # print('Parent: {}'.format(parent))
+        parents = parent_module_definitions(sbh_query, parent)
+        # print('Found {} ancestors'.format(len(parents)))
+        if not parents:
+            roots.append(parent)
+        ancestors.extend(parents)
+    return roots
+
+
+# cache size 256 is an arbitrary choice
+@functools.lru_cache(maxsize=256)
 def child_module_definitions(sbh_query, uri):
     """Find all children that are module definitions
     """
     # Gather module definitions found via an intervening "Module" node
     modules = objects_for(sbh_query, uri, SBOL_MODULE)
-    
     module_defs = [objects_for(sbh_query, m, SBOL_DEFINITION) for m in modules]
     result = set(md for md_list in module_defs for md in md_list)
     return result
 
+
+# cache size 256 is an arbitrary choice
+@functools.lru_cache(maxsize=256)
 def child_component_definitions(sbh_query, uri):
     """Find all children that are component definitions.
     """
@@ -305,7 +337,6 @@ def child_component_definitions(sbh_query, uri):
     comp_defs = [objects_for(sbh_query, fc, SBOL_DEFINITION) for fc in fcs]
     result = set(cd for cd_list in comp_defs for cd in cd_list)
     return result
-
 
 
 def triple_exists(sbh_query, subj, pred, obj):
@@ -318,6 +349,8 @@ def triple_exists(sbh_query, subj, pred, obj):
     return bool(result)
 
 
+# cache size 256 is an arbitrary choice
+@functools.lru_cache(maxsize=256)
 def module_is_strain(sbh_query, module_uri):
     """Determines if the given module contains the given strain."""
     # Just this module, not a recursive search
@@ -326,6 +359,50 @@ def module_is_strain(sbh_query, module_uri):
     return triple_exists(sbh_query, module_uri, SBOL_ROLE, 'http://purl.obolibrary.org/obo/NCIT_C14419')
 
 
+# cache size 256 is an arbitrary choice
+@functools.lru_cache(maxsize=256)
+def is_reagent(sbh_query, uri):
+    types = sbhe.objects_for(sbh_query, uri, SBOL_TYPE)
+    for typ in types:
+        if typ.startswith(CHEBI_PURL_PREFIX) or typ.startswith(CHEBI_IDENTIFIERS_PREFIX):
+            return True
+    return False
+
+
+# Don't cache here, cache in the next layer out, like `find_contained_reagents`
+def find_contained_items(sbh_query, uri, predicate):
+    found = []
+    uris = [uri]
+    while uris:
+        item = uris.pop(0)
+        if predicate(sbh_query, item):
+            found.append(item)
+        uris.extend(sbhe.child_module_definitions(sbh_query, item))
+        uris.extend(sbhe.child_component_definitions(sbh_query, item))
+    return found
+
+
+# Syntactic sugar. Find contained items that match the `is_reagent`
+# predicate.
+#
+# cache size 256 is an arbitrary choice
+@functools.lru_cache(maxsize=256)
+def find_contained_reagents(sbh_query, uri):
+    """Walk down the hierarchy of ModuleDefinitions and
+    ComponentDefinitions finding items that match the `is_reagent`
+    predicate.
+
+    """
+    return find_contained_items(sbh_query, uri, is_reagent)
+
+
+# This should leverage `find_contained_items` now that it exists.
+#
+# An optimization could be to have find_contained_items only search
+# the module definitions to make the search for strains faster.
+#
+# cache size 256 is an arbitrary choice
+@functools.lru_cache(maxsize=256)
 def find_contained_strains(sbh_query, uri):
     strains = []
     modules = [uri]

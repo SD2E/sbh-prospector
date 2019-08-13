@@ -2,7 +2,7 @@ import sys
 import logging
 
 import synbiohub_adapter as sbha
-import sbh_explorer as sbhe
+import sbh_prospector as sbhp
 
 """Find all the strains contained in all the members of the yeast
 gates challenge problem.
@@ -17,9 +17,9 @@ sbh_query = sbha.SynBioHubQuery(sbha.SD2Constants.SD2_SERVER)
 sbh_query.login(SBH_USER, SBH_PASSWORD)
 
 # First get all the members of the yeast gates challenge problem
-yg_members = sbhe.objects_for(sbh_query,
+yg_members = sbhp.objects_for(sbh_query,
                               sbha.SD2Constants.YEAST_GATES_DESIGN_COLLECTION,
-                              sbhe.SBOL_MEMBER)
+                              sbhp.SBOL_MEMBER)
 print('Found {} yeast gate challenge problem members'.format(len(yg_members)))
 
 # Iterate through the members, finding contained strains
@@ -28,7 +28,7 @@ print('Looking for strains...', end='', flush=True)
 yg_count = 0
 for yg in yg_members:
     # print(yg)
-    strains = sbhe.find_contained_strains(sbh_query, yg)
+    strains = sbhp.find_contained_strains(sbh_query, yg)
     all_strains.extend(strains)
     yg_count += 1
     if yg_count % 10 == 0:

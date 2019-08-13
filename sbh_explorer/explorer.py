@@ -75,6 +75,9 @@ CHALLENGE_PROBLEMS = [
 DC_TERMS_TITLE = 'http://purl.org/dc/terms/title'
 RDF_TYPE = 'http://www.w3.org/1999/02/22-rdf-syntax-ns#type'
 
+# SD2-specific values
+SD2E_STUB = 'http://sd2e.org#stub_object'
+
 
 def subjects_for(sbh_query, pred, obj):
     sparql = SUBJECT_QUERY.format(pred, obj)
@@ -367,6 +370,19 @@ def is_reagent(sbh_query, uri):
         if typ.startswith(CHEBI_PURL_PREFIX) or typ.startswith(CHEBI_IDENTIFIERS_PREFIX):
             return True
     return False
+
+
+# cache size 256 is an arbitrary choice
+@functools.lru_cache(maxsize=256)
+def is_stub(sbh_query, uri):
+    """Determines if the given URI is marked as a stub in SynBioHub.
+    Returns True if it is marked as a stub, False otherwise.
+    """
+    stub_values = sbhe.objects_for(sbh_query, uri, SD2E_STUB)
+    # TODO: Is it the very presence of the STUB attribute that denotes
+    # a stub? Or does the value somehow denote it? The string 'true'
+    # is one example.
+    return 'true' in stub_values
 
 
 # Don't cache here, cache in the next layer out, like `find_contained_reagents`

@@ -360,13 +360,16 @@ def triple_exists(sbh_query, subj, pred, obj):
 
 # cache size 256 is an arbitrary choice
 @functools.lru_cache(maxsize=256)
-def module_is_strain(sbh_query, module_uri):
+def is_strain(sbh_query, module_uri):
     """Determines if the given module contains the given strain."""
     # Just this module, not a recursive search
     # Strains are ModuleDefinitions that have a role ('http://sbols.org/v2#role’)
     # of 'http://purl.obolibrary.org/obo/NCIT_C14419’.
     return triple_exists(sbh_query, module_uri, SBOL_ROLE, 'http://purl.obolibrary.org/obo/NCIT_C14419')
 
+# Backward compatibity
+# TODO: remove any callers of module_is_strain
+module_is_strain = is_strain
 
 # cache size 256 is an arbitrary choice
 @functools.lru_cache(maxsize=256)

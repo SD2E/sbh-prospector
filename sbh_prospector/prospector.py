@@ -429,28 +429,18 @@ def find_contained_reagents(sbh_query, uri):
     return find_contained_items(sbh_query, uri, is_reagent)
 
 
-# This should leverage `find_contained_items` now that it exists.
-#
-# An optimization could be to have find_contained_items only search
-# the module definitions to make the search for strains faster.
+# Syntactic sugar. Find contained items that match the `is_strain`
+# predicate.
 #
 # cache size 256 is an arbitrary choice
 @functools.lru_cache(maxsize=256)
 def find_contained_strains(sbh_query, uri):
-    strains = []
-    modules = [uri]
-    while modules:
-        module = modules.pop(0)
-        # print('Module: {}'.format(module))
-        if module_is_strain(sbh_query, module):
-            strains.append(module)
-        # print('Modules: {}'.format(modules))
-        children = child_module_definitions(sbh_query, module)
-        # print('children: {}'.format(children))
-        # print('Module {} has {} children'.format(module, len(children)))
-        modules.extend(children)
-    # print('Strains: {}'.format(strains))
-    return strains
+    """Walk down the hierarchy of ModuleDefinitions and
+    ComponentDefinitions finding items that match the `is_strain`
+    predicate.
+
+    """
+    return find_contained_items(sbh_query, uri, is_strain)
 
 
 def parse_args(args):

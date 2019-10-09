@@ -60,6 +60,7 @@ SBOL_MODULE = SBOL_ROOT + '#module'
 SBOL_BUILT = SBOL_ROOT + '#built'
 SBOL_ROLE = SBOL_ROOT + '#role'
 SBOL_TYPE = SBOL_ROOT + '#type'
+SBOL_SEQUENCE_ANNOTATION = SBOL_ROOT + '#sequenceAnnotation'
 
 # CHEBI prefixes are used to identify reagents
 CHEBI_PURL_PREFIX = 'http://purl.obolibrary.org/obo/CHEBI'

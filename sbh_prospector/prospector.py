@@ -368,9 +368,11 @@ def is_strain(sbh_query, module_uri):
     # of 'http://purl.obolibrary.org/obo/NCIT_C14419’.
     return triple_exists(sbh_query, module_uri, SBOL_ROLE, 'http://purl.obolibrary.org/obo/NCIT_C14419')
 
+
 # Backward compatibity
 # TODO: remove any callers of module_is_strain
 module_is_strain = is_strain
+
 
 # cache size 256 is an arbitrary choice
 @functools.lru_cache(maxsize=256)

@@ -51,10 +51,10 @@ SP_QUERY = """
 """
 
 SBOL_ROOT = 'http://sbols.org/v2'
-SBOL_TYPE_COMPONENT = 'http://sbols.org/v2#Component'
-SBOL_PRED_COMPONENT = 'http://sbols.org/v2#component'
-SBOL_DEFINITION = 'http://sbols.org/v2#definition'
-SBOL_MEMBER = 'http://sbols.org/v2#member'
+SBOL_TYPE_COMPONENT = SBOL_ROOT + '#Component'
+SBOL_PRED_COMPONENT = SBOL_ROOT + '#component'
+SBOL_DEFINITION = SBOL_ROOT + '#definition'
+SBOL_MEMBER = SBOL_ROOT + '#member'
 SBOL_FUNCTIONAL_COMPONENT = SBOL_ROOT + '#functionalComponent'
 SBOL_MODULE = SBOL_ROOT + '#module'
 SBOL_BUILT = SBOL_ROOT + '#built'

@@ -394,6 +394,14 @@ def is_stub(sbh_query, uri):
     return 'true' in stub_values
 
 
+# cache size 256 is an arbitrary choice
+@functools.lru_cache(maxsize=256)
+def is_promoter(sbh_query, uri):
+    """Determines if the given URI has the role of a promoter.
+    """
+    return sbhp.triple_exists(sbh_query, uri, sbhp.SBOL_ROLE, 'http://identifiers.org/so/SO:0000167')
+
+
 # Don't cache here, cache in the next layer out, like `find_contained_reagents`
 def find_contained_items(sbh_query, uri, predicate):
     found = []

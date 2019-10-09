@@ -339,6 +339,12 @@ def child_component_definitions(sbh_query, uri):
     fcs = objects_for(sbh_query, uri, SBOL_FUNCTIONAL_COMPONENT)
     comp_defs = [objects_for(sbh_query, fc, SBOL_DEFINITION) for fc in fcs]
     result = set(cd for cd_list in comp_defs for cd in cd_list)
+
+    # Gather component definitions found via an intervening "component" node
+    # uri --component--> Component --definition--> ComponentDefinition
+    comps = objects_for(sbh_query, uri, SBOL_PRED_COMPONENT)
+    defs = [objects_for(sbh_query, comp, SBOL_DEFINITION) for comp in comps]
+    result.update(d for d_list in defs for d in d_list)
     return result
 
 
